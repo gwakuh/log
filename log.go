@@ -16,7 +16,7 @@ type Logger struct {
 	MaxBackups    int    `default:"7"`
 	MaxAge        int    `default:"30"` // days
 	Compress      bool   `default:"false"`
-	Logger        *logrus.Logger
+	Logrus        *logrus.Logger
 }
 
 func NewWithParams(filePath, fileExtension string, maxSize, maxBackups, maxAge int, compress bool) *Logger {
@@ -27,13 +27,13 @@ func NewWithParams(filePath, fileExtension string, maxSize, maxBackups, maxAge i
 		MaxBackups:    maxBackups,
 		MaxAge:        maxAge,
 		Compress:      compress,
-		Logger:        logrusLogger(lumberjackLogger(filePath+fileExtension, maxSize, maxBackups, maxAge, compress)),
+		Logrus:        logrusLogger(lumberjackLogger(filePath+fileExtension, maxSize, maxBackups, maxAge, compress)),
 	}
 }
 
 func New() *Logger {
 	return &Logger{
-		Logger: logrusLogger(os.Stdout),
+		Logrus: logrusLogger(os.Stdout),
 	}
 }
 
@@ -55,17 +55,18 @@ func lumberjackLogger(filePath string, maxSize int, maxBackups int, maxAge int, 
 	}
 }
 
-func (logger *Logger) Log(level string, msg string, args ...interface{}) {
-	l := logger.Logger
+func (l *Logger) Info(msg string, args ...interface{}) {
+	l.Logrus.Infof(msg+"\n", args...)
+}
 
-	switch level {
-	case Info:
-		l.Infof(msg+"\n", args...)
-	case Warning:
-		l.Warnf(msg+"\n", args...)
-	case Error:
-		l.Errorf(msg+"\n", args...)
-	case Debug:
-		l.Debugf(msg+"\n", args...)
-	}
+func (l *Logger) Warn(msg string, args ...interface{}) {
+	l.Logrus.Warnf(msg+"\n", args...)
+}
+
+func (l *Logger) Error(msg string, args ...interface{}) {
+	l.Logrus.Errorf(msg+"\n", args...)
+}
+
+func (l *Logger) Debug(msg string, args ...interface{}) {
+	l.Logrus.Debugf(msg+"\n", args...)
 }
